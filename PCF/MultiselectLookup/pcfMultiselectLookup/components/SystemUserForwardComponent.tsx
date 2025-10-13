@@ -65,11 +65,15 @@ export class SystemUserForwardComponent extends React.Component<
     };
 
     private onUsersSelected = (selectedUsers: SystemUser[]): void => {
+        console.log('SystemUserForwardComponent - onUsersSelected called with users:', selectedUsers);
+        
         // Extract email addresses and join with semicolons
         const emails = selectedUsers
             .map(user => user.internalemailaddress)
             .filter(email => email && email.trim()) // Filter out empty emails
             .join(';');
+
+        console.log('SystemUserForwardComponent - Extracted emails:', emails);
 
         this.setState({ 
             selectedEmails: emails,
@@ -79,7 +83,10 @@ export class SystemUserForwardComponent extends React.Component<
 
         // Notify parent component of the change
         if (this.props.onEmailsChanged) {
+            console.log('SystemUserForwardComponent - Calling onEmailsChanged with emails:', emails);
             this.props.onEmailsChanged(emails);
+        } else {
+            console.log('SystemUserForwardComponent - onEmailsChanged prop is not available');
         }
     };
 
@@ -129,7 +136,7 @@ export class SystemUserForwardComponent extends React.Component<
                     <Stack tokens={{ childrenGap: 16 }}>
                         <Stack horizontal horizontalAlign="start">
                             <PrimaryButton
-                                text="Select users to forward"
+                                text="Select Users"
                                 iconProps={{ iconName: 'People' }}
                                 onClick={this.onOpenModal}
                                 disabled={disabled}
@@ -336,7 +343,7 @@ class SystemUserSearchContent extends React.Component<
         super(props);
 
         this.userService = new SystemUserService(props.context);
-        this.userService.setPageSize(25); // Show 25 records as requested
+        this.userService.setPageSize(5); // Show 5 records as requested
 
         // Pre-populate selected users based on initial emails
         const initialSelectedUsers = this.parseEmailsToUsers(props.initialSelectedEmails || '');
@@ -357,7 +364,7 @@ class SystemUserSearchContent extends React.Component<
     }
 
     public async componentDidMount(): Promise<void> {
-        // Load first 25 users automatically when component mounts
+        // Load first 5 users automatically when component mounts
         await this.loadInitialUsers();
     }
 
@@ -368,7 +375,7 @@ class SystemUserSearchContent extends React.Component<
             // Clear any cached pagination data
             this.userService.clearCache();
             
-            // Load first 25 users without search filter
+            // Load first 5 users without search filter
             const result = await this.userService.getActiveUsers(1);
 
             this.setState({
@@ -448,7 +455,7 @@ class SystemUserSearchContent extends React.Component<
             error: null
         });
         
-        // Reload the first 25 users when clearing search
+        // Reload the first 5 users when clearing search
         await this.loadInitialUsers();
     };
 
@@ -483,6 +490,8 @@ class SystemUserSearchContent extends React.Component<
     };
 
     private onConfirmSelection = (): void => {
+        console.log('SystemUserForwardComponent - onConfirmSelection called');
+        console.log('SystemUserForwardComponent - Selected users:', this.state.selectedUsers);
         this.props.onUsersSelected(this.state.selectedUsers);
     };
 
@@ -590,8 +599,8 @@ class SystemUserSearchContent extends React.Component<
                             Showing only enabled users from Active Directory with assigned departments
                         </Text>
                     </Stack>
-                    <Stack horizontal tokens={{ childrenGap: 10 }} verticalAlign="end">
-                        <Stack.Item grow>
+                    <Stack horizontal tokens={{ childrenGap: 15 }} verticalAlign="end">
+                        <Stack.Item grow={3}>
                             <TextField
                                 label="Search by Name"
                                 placeholder="Enter first name, last name, or email..."
@@ -600,7 +609,7 @@ class SystemUserSearchContent extends React.Component<
                                 onKeyPress={this.onKeyPress}
                                 disabled={loading}
                                 styles={{
-                                    root: { width: '100%' },
+                                    root: { width: '100%', minWidth: '400px' },
                                     fieldGroup: { borderRadius: '4px', border: '2px solid #e1e5e9' },
                                     field: { padding: '8px 12px' }
                                 }}
@@ -614,15 +623,6 @@ class SystemUserSearchContent extends React.Component<
                             styles={{
                                 root: { minWidth: '100px', height: '32px', borderRadius: '4px' },
                                 rootHovered: { backgroundColor: '#106ebe' }
-                            }}
-                        />
-                        <DefaultButton
-                            text="Show All"
-                            iconProps={{ iconName: 'People' }}
-                            onClick={this.loadInitialUsers}
-                            disabled={loading}
-                            styles={{
-                                root: { minWidth: '90px', height: '32px', borderRadius: '4px' }
                             }}
                         />
                         <DefaultButton
@@ -672,12 +672,49 @@ class SystemUserSearchContent extends React.Component<
                                } 
                            }}>
                         
-                        {/* Results Header */}
-                        <Stack horizontal horizontalAlign="space-between" verticalAlign="center" 
-                               styles={{ root: { padding: '16px 20px 0', borderBottom: '1px solid #f3f2f1' } }}>
+                        {/* Action Buttons - Moved to top */}
+                        <Stack horizontal horizontalAlign="space-between" tokens={{ childrenGap: 15 }}
+                               styles={{ root: { padding: '20px 20px 16px', borderBottom: '2px solid #f3f2f1', backgroundColor: '#f8f9fa' } }}>
                             <Text variant="medium" styles={{ root: { fontWeight: 600, color: '#2c3e50' } }}>
                                 📋 Active AD Users (A-Z)
                             </Text>
+                            <Stack horizontal tokens={{ childrenGap: 12 }}>
+                                <DefaultButton
+                                    text="Cancel"
+                                    onClick={onCancel}
+                                    disabled={loading}
+                                    styles={{
+                                        root: { 
+                                            minWidth: '100px', 
+                                            height: '36px',
+                                            borderRadius: '4px',
+                                            border: '1px solid #d1d1d1'
+                                        }
+                                    }}
+                                />
+                                <PrimaryButton
+                                    text={selectedUsers.length > 0 ? `Select ${selectedUsers.length} User(s)` : 'Select Users'}
+                                    onClick={this.onConfirmSelection}
+                                    disabled={selectedUsers.length === 0 || loading}
+                                    styles={{
+                                        root: { 
+                                            minWidth: '140px', 
+                                            height: '36px',
+                                            borderRadius: '4px',
+                                            backgroundColor: '#0078d4',
+                                            border: 'none'
+                                        },
+                                        rootHovered: {
+                                            backgroundColor: '#106ebe'
+                                        }
+                                    }}
+                                />
+                            </Stack>
+                        </Stack>
+
+                        {/* Results Info */}
+                        <Stack horizontal horizontalAlign="space-between" verticalAlign="center" 
+                               styles={{ root: { padding: '0 20px' } }}>
                             <Stack horizontal tokens={{ childrenGap: 8 }} verticalAlign="center">
                                 <Text variant="small" styles={{ root: { color: '#0078d4', fontWeight: 600 } }}>
                                     {searchResults.length} users • Page {currentPage} of {totalPages}
@@ -690,7 +727,7 @@ class SystemUserSearchContent extends React.Component<
 
                         {/* Results Grid */}
                         <div style={{ 
-                            maxHeight: '400px', 
+                            maxHeight: '300px', 
                             overflowY: 'auto',
                             margin: '0 20px',
                             border: '1px solid #edebe9',
@@ -790,7 +827,7 @@ class SystemUserSearchContent extends React.Component<
                                     <DefaultButton
                                         text="Next ➡"
                                         onClick={this.onNextPage}
-                                        disabled={currentPage >= 20 || loading} // 495/25 = 20 pages max
+                                        disabled={currentPage >= 99 || loading} // 495/5 = 99 pages max
                                         styles={{ 
                                             root: { 
                                                 minWidth: '110px',
@@ -837,56 +874,25 @@ class SystemUserSearchContent extends React.Component<
 
                 <Separator styles={{ root: { margin: '20px 0' } }} />
 
-                {/* Action Buttons */}
-                <Stack horizontal horizontalAlign="space-between" tokens={{ childrenGap: 15 }}
-                       styles={{ root: { padding: '20px', background: 'white', borderRadius: '8px', border: '1px solid #e1e5e9' } }}>
-                    <DefaultButton
-                        text="Clear Selection"
-                        iconProps={{ iconName: 'Clear' }}
-                        onClick={this.onClearSelection}
-                        disabled={selectedUsers.length === 0 || loading}
-                        styles={{
-                            root: { 
-                                minWidth: '120px', 
-                                height: '36px',
-                                borderRadius: '4px',
-                                border: '1px solid #d1d1d1'
-                            }
-                        }}
-                    />
-                    <Stack horizontal tokens={{ childrenGap: 12 }}>
+                {/* Clear Selection - Keep this at bottom */}
+                {selectedUsers.length > 0 && (
+                    <Stack horizontalAlign="center">
                         <DefaultButton
-                            text="Cancel"
-                            onClick={onCancel}
-                            disabled={loading}
+                            text="Clear Selection"
+                            iconProps={{ iconName: 'Clear' }}
+                            onClick={this.onClearSelection}
+                            disabled={selectedUsers.length === 0 || loading}
                             styles={{
                                 root: { 
-                                    minWidth: '100px', 
+                                    minWidth: '120px', 
                                     height: '36px',
                                     borderRadius: '4px',
                                     border: '1px solid #d1d1d1'
                                 }
                             }}
                         />
-                        <PrimaryButton
-                            text={selectedUsers.length > 0 ? `Select ${selectedUsers.length} User(s)` : 'Select Users'}
-                            onClick={this.onConfirmSelection}
-                            disabled={selectedUsers.length === 0 || loading}
-                            styles={{
-                                root: { 
-                                    minWidth: '140px', 
-                                    height: '36px',
-                                    borderRadius: '4px',
-                                    backgroundColor: '#0078d4',
-                                    border: 'none'
-                                },
-                                rootHovered: {
-                                    backgroundColor: '#106ebe'
-                                }
-                            }}
-                        />
                     </Stack>
-                </Stack>
+                )}
             </Stack>
         );
     }

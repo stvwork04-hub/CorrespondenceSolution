@@ -28,7 +28,7 @@ export interface SystemUserSearchResult {
 
 export class SystemUserService {
     private context: ComponentFramework.Context<any>;
-    private pageSize: number = 25;
+    private pageSize: number = 5;
     private lastUserIdPerPage: Map<number, string> = new Map(); // Store last user ID for each page
     private pageData: Map<number, SystemUser[]> = new Map(); // Cache page data
 
@@ -79,7 +79,7 @@ export class SystemUserService {
 
             // Calculate pagination info
             const totalRecords = 495; // Known total from your environment
-            const totalPages = Math.ceil(totalRecords / this.pageSize); // 495/25 = 20 pages
+            const totalPages = Math.ceil(totalRecords / this.pageSize); // 495/5 = 99 pages
             
             const pagination: PaginationInfo = {
                 currentPage: page,

@@ -5,6 +5,7 @@
     </external-service-usage>
     <!-- property node identifies a specific, configurable piece of data that the control expects from CDS -->
     <property name="selectedEmails" display-name-key="Selected Email Addresses" description-key="Semicolon-separated email addresses of selected system users" of-type="SingleLine.Text" usage="bound" required="false" />
+    <property name="forwardTo" display-name-key="Forward To" description-key="Indicates if correspondence should be forwarded (YES/NO)" of-type="SingleLine.Text" usage="bound" required="false" />
     <!--
       Property node's of-type attribute can be of-type-group attribute.
       Example:
