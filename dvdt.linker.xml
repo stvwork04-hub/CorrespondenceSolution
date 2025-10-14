@@ -2,6 +2,7 @@
 <DVDT>
   <WebResources>
     <Resource Id="a70e2689-6ca8-f011-bbd2-6045bd576627" dvDisplayName="tec_ValidateForwardToEmails" dvFilePath="tec_ValidateForwardToEmails" localFileName="tec_ValidateForwardToEmails.js" localFilePath="//WebResources/tec_ValidateForwardToEmails.js"></Resource>
+    <Resource Id="6fd95b18-2ca5-f011-bbd2-6045bd5ae52f" dvDisplayName="Correspondence Main js" dvFilePath="tec_correspondencemain.js" localFileName="tec_correspondencemain.js" localFilePath="//WebResources/tec_correspondencemain.js"></Resource>
   </WebResources>
   <Settings></Settings>
 </DVDT>
