@@ -296,30 +296,79 @@ function clearComments(executionContext) {
 }
 
 
-var pcfButtonEvent = (function () {
-  let _formContext;
+//Function to handle PCF button click event
+ let _formContext;
+const pcfControlFieldName = "tec_downloadpdfreportbutton";
 
-  const pcfControlFieldName = "tec_downloadpdfreportbutton";
+function onLoad(executionContext) {
+  const formContext = executionContext.getFormContext();
+  _formContext = formContext;
 
-  function onLoad(executionContext) {
-    const formContext = executionContext.getFormContext();
-    _formContext = formContext;
+  const pcfControl = formContext.getControl(pcfControlFieldName);
+  if (pcfControl) {
+    pcfControl.addEventHandler("onButtonClick", pcfButtonClicked);
+  } else {
+    console.error(`PCF control '${pcfControlFieldName}' not found.`);
+  }
+}
 
-    const pcfControl = formContext.getControl(pcfControlFieldName);
+async function pcfButtonClicked(params) {
+  try {
+    const recordId = _formContext.data.entity.getId().replace(/[{}]/g, "");
+    const pcfControl = _formContext.getControl(pcfControlFieldName);
+
+    // Save original text
+    const originalLabel = pcfControl.getLabel();
+
+    // 🔄 Change button text to “Generating Report...”
+    pcfControl.setLabel("Generating Report...");
+
+    console.log("PCF Button Clicked!");
+    console.log("Record ID:", recordId);
+
+    const body = {
+      MemoId: recordId
+    };
+
+    const url = "https://373178165d2f4f37b1d764849f039c.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/e243efa1e53d4c36b2a57b55b8b6f9fa/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Cj486zWDjr6KqG0RnEO7KeJWBgNcIyfCtBYZZD_vxjg";
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const text = await response.text();
+    let data = null;
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = text;
+      }
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${text || "Unknown error"}`);
+    }
+
+    console.log("Response from API:", data);
+    Xrm.Navigation.openAlertDialog({ text: "✅ Generating Report, Please wait..." });
+
+  } catch (error) {
+    console.error("Error calling endpoint:", error);
+    Xrm.Navigation.openAlertDialog({ text: "❌ Error generating report: " + error.message });
+  } finally {
+    // ⏪ Revert button label back to original
+    const pcfControl = _formContext.getControl(pcfControlFieldName);
     if (pcfControl) {
-      pcfControl.addEventHandler("onButtonClick", pcfButtonClicked);
+      pcfControl.setLabel("Generate Report");
     }
   }
+}
 
-  function pcfButtonClicked(params) {
-    alert("PCF Button Clicked!");
-    alert(params.Id);
-    alert(params.Name);
-  }
 
-  //public api
-  return {
-    onLoad: onLoad,
-    pcfButtonClicked: pcfButtonClicked,
-  };
-})();
+
+
+
+
