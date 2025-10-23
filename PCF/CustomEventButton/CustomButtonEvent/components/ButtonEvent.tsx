@@ -1,7 +1,5 @@
 import * as React from 'react'; 
 import { Label, DefaultButton } from '@fluentui/react'; 
-import { text } from 'stream/consumers';
-import { title } from 'process';
 
 // Props interface expects a parameter object for the first event
 export interface IButtonEventProps {
@@ -24,6 +22,8 @@ export const ButtonEvent: React.FunctionComponent<IButtonEventProps> = ({
     tooltip = "Click to execute custom action",
     onButtonClick
 }) => {
+    const [isHovered, setIsHovered] = React.useState(false);
+    const hoverColor = "#005a9e"; // Change this to your desired hover color
     return (
         <div>
             <DefaultButton
@@ -32,8 +32,15 @@ export const ButtonEvent: React.FunctionComponent<IButtonEventProps> = ({
                         onButtonClick({ Id, Name });
                     }
                 }}
-                style={{ marginRight: "8px", color: textColour, backgroundColor: color, }}
+                style={{
+                    marginRight: "8px",
+                    color: textColour,
+                    backgroundColor: isHovered ? hoverColor : color,
+                    transition: "background-color 0.2s"
+                }}
                 title={tooltip}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
             >
                 {text}
             </DefaultButton>
